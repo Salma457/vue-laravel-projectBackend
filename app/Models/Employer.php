@@ -22,9 +22,7 @@ class Employer extends Model
         'company_description',
     ];
 
-    /**
-     * العلاقة مع User (كل صاحب عمل مرتبط بمستخدم واحد)
-     */
+    
     public function user()
     {
         return $this->belongsTo(User::class);

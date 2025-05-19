@@ -4,46 +4,191 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Employer;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use App\Models\Application;
+use Illuminate\Support\Facades\Auth;
+
 
 class EmployerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function register(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name'           => 'required|string|max:255',
+            'email'          => 'required|string|email|unique:users,email',
+            'password'       => 'required|string|min:6',
+            'company_name'   => 'required|string|max:255',
+            'location'       => 'nullable|string',
+            'company_website'=> 'nullable|url',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => 'employer',
+        ]);
+
+        Employer::create([
+            'user_id'        => $user->id,
+            'company_name'   => $request->company_name,
+            'location'       => $request->location,
+            'company_website'=> $request->company_website,
+        ]);
+
+        return response()->json(['message' => 'Employer registered successfully'], 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function login(Request $request)
     {
-        //
+        $credentials = $request->only('email', 'password');
+
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+            return response()->json(['error' => 'Invalid credentials'], 401);
+        }
+
+        if ($user->role !== 'employer') {
+            return response()->json(['error' => 'Not authorized as employer'], 403);
+        }
+
+        $token = $user->createToken('employer_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login successful',
+            'token'   => $token,
+            'user'    => $user
+        ]);
+    }
+    public function profile(Request $request)
+{
+    $user = $request->user();
+
+    // تأكد إنه صاحب عمل
+    if ($user->role !== 'employer') {
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+    $employer = Employer::where('user_id', $user->id)->first();
+
+    return response()->json([
+        'user'     => $user,
+        'employer' => $employer,
+    ]);
+}
+public function updateProfile(Request $request)
+{
+    $user = $request->user();
+
+    if ($user->role !== 'employer') {
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+    $validator = Validator::make($request->all(), [
+        'name'            => 'sometimes|string|max:255',
+        'company_name'    => 'sometimes|string|max:255',
+        'location'        => 'nullable|string',
+        'company_website' => 'nullable|url',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+    // تحديث بيانات المستخدم
+    $user->update([
+        'name' => $request->name ?? $user->name,
+    ]);
+
+    // تحديث بيانات صاحب العمل
+    $employer = Employer::where('user_id', $user->id)->first();
+    $employer->update([
+        'company_name'    => $request->company_name ?? $employer->company_name,
+        'location'        => $request->location ?? $employer->location,
+        'company_website' => $request->company_website ?? $employer->company_website,
+    ]);
+
+    return response()->json([
+        'message'  => 'Profile updated successfully',
+        'user'     => $user,
+        'employer' => $employer,
+    ]);
+}
+public function logout(Request $request)
+{
+    $request->user()->currentAccessToken()->delete();
+
+    return response()->json([
+        'message' => 'Logged out successfully'
+    ]);
+}
+
+
+public function applications()
+{
+    $employer = Auth::user()->employer;
+
+    $applications = Application::with(['job', 'candidate'])
+        ->whereHas('job', function ($query) use ($employer) {
+            $query->where('employer_id', $employer->id);
+        })
+        ->get();
+
+    return response()->json($applications);
+}
+public function updateApplicationStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:pending,approved,rejected'
+    ]);
+
+    $application = Application::findOrFail($id);
+
+    $employer = Auth::user()->employer;
+
+    if ($application->job->employer_id != $employer->id) {
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
+
+    $application->status = $request->status;
+    $application->save();
+
+    return response()->json(['message' => 'Status updated successfully']);
+}
+public function deleteAccount()
+{
+    $user = Auth::user();
+
+    // حذف صاحب العمل وكل ما يتعلق به حسب العلاقات
+    $user->employer()->delete();
+    $user->delete();
+
+    return response()->json(['message' => 'Account deleted successfully']);
+}
+public function changePassword(Request $request)
+{
+    $request->validate([
+        'old_password' => 'required',
+        'new_password' => 'required|min:6|confirmed',
+    ]);
+
+    $user = Auth::user();
+
+    if (!Hash::check($request->old_password, $user->password)) {
+        return response()->json(['error' => 'Old password is incorrect'], 400);
+    }
+
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return response()->json(['message' => 'Password updated successfully']);
+}
 }

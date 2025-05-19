@@ -8,11 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Employer;
 use App\Models\Candidate;
+use Laravel\Sanctum\HasApiTokens;
+
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens,HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -51,5 +53,15 @@ class User extends Authenticatable
     {
         return $this->hasOne(Candidate::class);
     }
+    public function isEmployer(): bool
+{
+    return $this->role === 'employer';
+}
+
+public function isCandidate(): bool
+{
+    return $this->role === 'candidate';
+}
+
 
 }
