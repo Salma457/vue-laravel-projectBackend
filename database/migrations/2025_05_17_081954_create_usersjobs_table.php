@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('work_type');
             $table->string('location');
-$table->unsignedBigInteger('category_id')->nullable();
+            $table->unsignedBigInteger('category_id')->nullable();
             $table->float('salary_from')->nullable();
             $table->float('salary_to')->nullable();
             $table->date('deadline');
