@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employers', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id')->unique(); 
+            $table->id();//primary key and auto-incrementing
+            $table->unsignedBigInteger('user_id')->unique();
             $table->string('company_name');
             $table->string('location')->nullable();
             $table->string('company_website')->nullable();

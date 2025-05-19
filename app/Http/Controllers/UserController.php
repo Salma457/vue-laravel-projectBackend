@@ -22,7 +22,9 @@ class UserController extends Controller
         $validated_user = $request->validate([
             'name' => 'required|min:2|max:50',
             'email' => 'required|email|unique:users|max:50',
-            'password' => 'required|confirmed|min:6'
+            'password' => 'required|confirmed|min:6',
+            'role' => 'required',
+            
         ]);
 
         // hash the password before storing
@@ -30,6 +32,10 @@ class UserController extends Controller
 
         // adding using create
         $user = User::create($validated_user);
+
+
+        \Log::info('New user created:', $user->toArray());
+
 
         //send feedback
         return response()->json([

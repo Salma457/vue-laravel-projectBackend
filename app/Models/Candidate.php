@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Application;
 use App\Models\User;
 
 class Candidate extends Model
@@ -22,4 +23,9 @@ class Candidate extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function applications() {
+        return $this->hasMany(Application::class);
+    }
+
 }

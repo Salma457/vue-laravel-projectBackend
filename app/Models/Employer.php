@@ -21,9 +21,7 @@ class Employer extends Model
         'bio',
     ];
 
-    /**
-     * العلاقة مع User (كل صاحب عمل مرتبط بمستخدم واحد)
-     */
+    
     public function user()
     {
         return $this->belongsTo(User::class);
