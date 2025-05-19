@@ -19,10 +19,14 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
+        \Log::info("hello in the login");
+
         // get user by email
         $user = User::where('email', $request->email)->first();
 
-        // check password
+        \Log::info("password = ", ['password' => $request->password]);
+
+        // check password:
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
@@ -30,7 +34,7 @@ class AuthController extends Controller
         // create token using sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // send user data and token (avoid exposing full user model)
+        // send user data and token
         return response()->json([
             'user' => [
                 'id' => $user->id,
