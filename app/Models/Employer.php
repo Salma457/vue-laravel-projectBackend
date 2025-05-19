@@ -19,7 +19,6 @@ class Employer extends Model
         'company_logo',
         'phone',
         'bio',
-        'company_description',
     ];
 
     

@@ -11,64 +11,105 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Application;
 use Illuminate\Support\Facades\Auth;
 
-
 class EmployerController extends Controller
 {
-    public function register(Request $request)
+
+    // get all employers
+    public function index()
     {
-        $validator = Validator::make($request->all(), [
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|string|email|unique:users,email',
-            'password'       => 'required|string|min:6',
-            'company_name'   => 'required|string|max:255',
-            'location'       => 'nullable|string',
-            'company_website'=> 'nullable|url',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'employer',
-        ]);
-
-        Employer::create([
-            'user_id'        => $user->id,
-            'company_name'   => $request->company_name,
-            'location'       => $request->location,
-            'company_website'=> $request->company_website,
-        ]);
-
-        return response()->json(['message' => 'Employer registered successfully'], 201);
+        $emps =  Employer::all();
+        return $emps;
     }
+
+    // public function register(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'name'           => 'required|string|max:255',
+    //         'email'          => 'required|string|email|unique:users,email',
+    //         'password'       => 'required|string|min:6',
+    //         'company_name'   => 'required|string|max:255',
+    //         'location'       => 'nullable|string',
+    //         'company_website'=> 'nullable|url',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     $user = User::create([
+    //         'name'     => $request->name,
+    //         'email'    => $request->email,
+    //         'password' => Hash::make($request->password),
+    //         'role'     => 'employer',
+    //     ]);
+
+    //     Employer::create([
+    //         'user_id'        => $user->id,
+    //         'company_name'   => $request->company_name,
+    //         'location'       => $request->location,
+    //         'company_website'=> $request->company_website,
+    //     ]);
+
+    //     return response()->json(['message' => 'Employer registered successfully'], 201);
+    // }
+
+
+    public function store(Request $request)
+    {
+        // validation
+        $validated_employer = $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'company_name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'company_website' => 'required|url',
+            'company_logo' => 'required|string',
+            'phone' => 'required|string|max:20',
+            'bio' => 'required|string',
+        ]);
+        
+    
+        // create
+        $employer = Employer::create($validated_employer);
+    
+        // feedback
+        return response()->json([
+            'message' => 'Employer created successfully',
+            'data' => $employer
+        ], 201);
+    }
+
+
 
     public function login(Request $request)
     {
+        // only the email and password
         $credentials = $request->only('email', 'password');
 
+        // check email
         $user = User::where('email', $credentials['email'])->first();
 
+        // check the password
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
+        // check authrization [should not be here]
         if ($user->role !== 'employer') {
             return response()->json(['error' => 'Not authorized as employer'], 403);
         }
 
+        // gennerate the token
         $token = $user->createToken('employer_token')->plainTextToken;
 
+        // in the response: message, token, user
         return response()->json([
             'message' => 'Login successful',
             'token'   => $token,
             'user'    => $user
         ]);
     }
-    public function profile(Request $request)
+
+public function profile(Request $request)
 {
     $user = $request->user();
 
@@ -84,6 +125,7 @@ class EmployerController extends Controller
         'employer' => $employer,
     ]);
 }
+
 public function updateProfile(Request $request)
 {
     $user = $request->user();

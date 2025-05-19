@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('company_name');
             $table->string('location')->nullable();
             $table->string('company_website')->nullable();
-             $table->string('company_logo')->nullable();
+            $table->string('company_logo')->nullable();
             $table->string('phone')->nullable();
-            $table->text('bio')->nullable();
+            $table->text('bio')->nullable(); //newly added
             $table->text('company_description')->nullable();
             $table->timestamps();
 

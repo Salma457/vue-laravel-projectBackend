@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Application;
+use App\Models\User;
+
 class Candidate extends Model
 {
     protected $fillable = [
