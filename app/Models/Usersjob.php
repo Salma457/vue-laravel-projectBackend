@@ -27,17 +27,16 @@ class Usersjob extends Model
         'benefits',
     ];
 
+    // relationship with employer
     public function employer()
-    {
-        return $this->belongsTo(Employer::class);
-    }
+    {return $this->belongsTo(Employer::class);}
 
+    // relationship with category
     public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
-    public function applications()
-{
+    {return $this->belongsTo(Category::class);}
+
+    // relationship: applications
+    public function applications(){
     return $this->hasMany(Application::class, 'job_id');
 }
 

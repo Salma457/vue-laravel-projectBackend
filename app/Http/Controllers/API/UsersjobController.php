@@ -9,13 +9,35 @@ use Illuminate\Support\Facades\Auth;
 
 class UsersjobController extends Controller
 {
+
+
+    //[SENU]:get all the jobs normally
+    public function getAllJobs()
+    {
+        $jobs = Usersjob::with(['category','employer'])->get();
+        return response()->json($jobs);
+    }
+    
+
+
+
+
+
+
     public function index()
     {
         $employer = Auth::user()->employer;
-        $jobs = $employer->jobs()->with('category')->get();
 
+        // return response()->json($employer);
+
+        $jobs = $employer->jobs()->with('category')->get();
         return response()->json($jobs);
     }
+
+
+
+
+
 
     public function store(Request $request)
     {

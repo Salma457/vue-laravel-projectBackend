@@ -8,6 +8,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\API\EmployerController;
 use App\Http\Controllers\API\UsersjobController;
+// import the application controller
+use App\Http\Controllers\ApplicationController;
+
+// add the useJobs
 
 /* PUBLIC ROUTES
 -------------------------------------------------------*/
@@ -57,6 +61,12 @@ Route::middleware('auth:sanctum')->put('/employer/applications/{id}', [EmployerC
 Route::middleware('auth:sanctum')->delete('/employer/delete', [EmployerController::class, 'deleteAccount']);
 Route::middleware('auth:sanctum')->post('/employer/change-password', [EmployerController::class, 'changePassword']);
 
+// [SENU] adding applications:
+Route::middleware('auth:sanctum')->post('/candidate/applications-add', [ApplicationController::class, 'store']);
+Route::middleware('auth:sanctum')->get('applications/candidate/{candidate_id}', [ApplicationController::class, 'getByCandidate']);
+Route::middleware('auth:sanctum')->delete('/applications/{id}', [ApplicationController::class, 'destroy']);
+
+
 /* PROTECTED ROUTES (require Bearer token in headers)
 ------------------------------------------------------*/
 Route::middleware('auth:sanctum')->group(function () {
@@ -68,6 +78,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
 });
+
+
+// GETTING ALL JOBS
+Route::middleware('auth:sanctum')->get('/jobs', [UsersjobController::class, 'getAllJobs']);
+
 
 
 
