@@ -21,7 +21,7 @@ class Employer extends Model
         'bio',
     ];
 
-    
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -30,4 +30,5 @@ class Employer extends Model
     {
         return $this->hasMany(Usersjob::class);
     }
+ 
 }

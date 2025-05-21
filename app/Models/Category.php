@@ -13,4 +13,5 @@ class Category extends Model
     public function usersjobs(){ 
         return $this->hasMany(Application::class, 'category_id');}
 
+    
 }
