@@ -195,7 +195,7 @@ public function applications()
 {
     $employer = Auth::user()->employer;
 
-    $applications = Application::with(['job', 'candidate'])
+    $applications = Application::with(['job', 'candidate.user'])
         ->whereHas('job', function ($query) use ($employer) {
             $query->where('employer_id', $employer->id);
         })
@@ -255,7 +255,7 @@ public function showApplication($id)
     $employer = Auth::user()->employer;
 
     // نجيب الطلب مع العلاقات
-    $application = Application::with(['job', 'candidate'])
+    $application = Application::with(['job', 'candidate.user'])
         ->where('id', $id)
         ->whereHas('job', function ($query) use ($employer) {
             $query->where('employer_id', $employer->id);
@@ -304,7 +304,7 @@ public function latestApplications(Request $request)
     $employer = auth()->user();
 
     $applications = \App\Models\Application::whereIn('job_id', $employer->jobs()->pluck('id'))
-        ->with('candidate', 'job')
+        ->with('candidate.user', 'job')
         ->latest()
         ->take(5)
         ->get();
@@ -312,14 +312,15 @@ public function latestApplications(Request $request)
     $formatted = $applications->map(function ($app) {
         return [
             'id' => $app->id,
-            'candidate_name' => $app->candidate->name ?? 'غير معروف',
-            'job_title' => $app->job->title ?? 'وظيفة محذوفة',
+            'candidate_name' => $app->candidate->user->name ?? 'غير معروف', // <-- اسم المستخدم
+            'job_title' => $app->job->title ?? 'Deleted Job',
             'created_at' => $app->created_at,
         ];
     });
 
     return response()->json($formatted);
 }
+
 // داخل EmployerController
 public function applicationsByStatus()
 {
