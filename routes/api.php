@@ -2,17 +2,19 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\API\EmployerController;
 use App\Http\Controllers\API\UsersjobController;
-
 /* PUBLIC ROUTES
 -------------------------------------------------------*/
 Route::post('/login', [AuthController::class, 'login']); //login
-
+//admin
+// Route::middleware(['auth:sanctum', 'can:view-all-jobs'])->group(function () {
+//     Route::get('/admin/jobs', [AdminController::class, 'index']); // New controller or method
+// });
 // users
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
@@ -20,6 +22,7 @@ Route::post('/users', [UserController::class, 'store']);
 // candidates
 Route::get('/candidates', [CandidateController::class, 'index']);
 Route::post('/candidates', [CandidateController::class, 'store']);
+Route::get('/candidates/{id}', [CandidateController::class, 'show']);
 
 // employers
 Route::get('/employers', [EmployerController::class, 'index']);
@@ -50,6 +53,8 @@ Route::middleware('auth:sanctum')->prefix('employer')->group(function () {
     Route::put('jobs/{id}', [UsersjobController::class, 'update']);
     Route::delete('jobs/{id}', [UsersjobController::class, 'destroy']);
 });
+//admin routs
+
 // Route::middleware('auth:sanctum')->post('/employer/logout', [EmployerController::class, 'logout']); //DELETED[SENU]
 
 Route::middleware('auth:sanctum')->get('/employer/applications', [EmployerController::class, 'applications']);

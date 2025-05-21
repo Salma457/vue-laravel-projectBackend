@@ -13,6 +13,16 @@ class CandidateController extends Controller
         $candidates = Candidate::all();
         return $candidates;
     }
+  public function show($id)
+{
+    $candidate = Candidate::find($id);
+
+    if (!$candidate) {
+        return response()->json(['message' => 'Candidate not found'], 404);
+    }
+
+    return response()->json($candidate);
+}
 
     public function store(Request $request) {
 
