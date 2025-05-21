@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Employer;
 use App\Models\Category;
 use App\Models\Application;
+use App\Models\JobSkill;
 
 class Usersjob extends Model
 {
@@ -20,9 +21,9 @@ class Usersjob extends Model
         'category_id',
         'salary_from',
         'salary_to',
+        'experience',
         'deadline',
         'description',
-        'status',
         'responsibilities',
         'benefits',
     ];
@@ -40,5 +41,10 @@ class Usersjob extends Model
 {
     return $this->hasMany(Application::class, 'job_id');
 }
+public function skills()
+{
+    return $this->hasMany(JobSkill::class, 'job_id');
+}
+
 
 }

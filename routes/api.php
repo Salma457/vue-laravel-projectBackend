@@ -8,6 +8,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\API\EmployerController;
 use App\Http\Controllers\API\UsersjobController;
+use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\EnumOptionsController;
+
 
 /* PUBLIC ROUTES
 -------------------------------------------------------*/
@@ -42,30 +45,44 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->get('/employer/profile', [EmployerController::class, 'profile']);
 Route::middleware('auth:sanctum')->put('/employer/profile', [EmployerController::class, 'updateProfile']);
 
-// for employer: 
+// for employer:
 Route::middleware('auth:sanctum')->prefix('employer')->group(function () {
     Route::get('jobs', [UsersjobController::class, 'index']);
     Route::post('jobs', [UsersjobController::class, 'store']);
     Route::get('jobs/{id}', [UsersjobController::class, 'show']);
     Route::put('jobs/{id}', [UsersjobController::class, 'update']);
     Route::delete('jobs/{id}', [UsersjobController::class, 'destroy']);
+
+     // إحصائيات للوحة التحكم
+    Route::get('stats', [EmployerController::class, 'dashboardStats']);
+    Route::get('latest-jobs', [EmployerController::class, 'latestJobs']);
+    Route::get('latest-applications', [EmployerController::class, 'latestApplications']);
 });
 // Route::middleware('auth:sanctum')->post('/employer/logout', [EmployerController::class, 'logout']); //DELETED[SENU]
 
 Route::middleware('auth:sanctum')->get('/employer/applications', [EmployerController::class, 'applications']);
 Route::middleware('auth:sanctum')->put('/employer/applications/{id}', [EmployerController::class, 'updateApplicationStatus']);
+Route::middleware('auth:sanctum')->get('/employer/applications/{id}', [EmployerController::class, 'showApplication']);
+
 Route::middleware('auth:sanctum')->delete('/employer/delete', [EmployerController::class, 'deleteAccount']);
 Route::middleware('auth:sanctum')->post('/employer/change-password', [EmployerController::class, 'changePassword']);
 
 /* PROTECTED ROUTES (require Bearer token in headers)
 ------------------------------------------------------*/
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     Route::get('/user', function (Request $request) {
         return $request->user(); // <current authenticated user>
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
+Route::middleware('auth:sanctum')->get('/employer/applications-status', [EmployerController::class, 'applicationsByStatus']);
+Route::middleware('auth:sanctum')->get('/employer/top-applied-jobs', [EmployerController::class, 'topJobsWithApplications']);
+Route::middleware('auth:sanctum')->get('/employer/latest-comments', [EmployerController::class, 'latestComments']);
+
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/job/options', [EnumOptionsController::class, 'jobOptions']);
+
 
 });
 
@@ -76,9 +93,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum'):
 makes sure Laravel auto checks Bearer token in the Authorization header.
 
-If valid::::::: 
+If valid:::::::
 auth()->user()
-$request->user(): 
+$request->user():
 will return the logged-in user.
 
 

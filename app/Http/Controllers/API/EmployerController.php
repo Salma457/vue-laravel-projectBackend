@@ -66,11 +66,11 @@ class EmployerController extends Controller
             'phone' => 'required|string|max:20',
             'bio' => 'required|string',
         ]);
-        
-    
+
+
         // create
         $employer = Employer::create($validated_employer);
-    
+
         // feedback
         return response()->json([
             'message' => 'Employer created successfully',
@@ -233,4 +233,105 @@ public function changePassword(Request $request)
 
     return response()->json(['message' => 'Password updated successfully']);
 }
+public function showApplication($id)
+{
+    $employer = Auth::user()->employer;
+
+    // نجيب الطلب مع العلاقات
+    $application = Application::with(['job', 'candidate'])
+        ->where('id', $id)
+        ->whereHas('job', function ($query) use ($employer) {
+            $query->where('employer_id', $employer->id);
+        })
+        ->first();
+
+    if (!$application) {
+        return response()->json(['message' => 'Application not found or unauthorized'], 404);
+    }
+
+    return response()->json($application);
+}
+// احصائيات للوحة التحكم
+public function dashboardStats(Request $request)
+{
+    $employer = auth()->user();
+
+    $jobsCount = $employer->jobs()->count(); // علاقة jobs لازم تكون معرفة في الموديل
+    $applicationsCount = \App\Models\Application::whereIn('job_id', $employer->jobs()->pluck('id'))->count();
+    $commentsCount = \App\Models\Comment::whereIn('job_id', $employer->jobs()->pluck('id'))->count();
+
+    return response()->json([
+        'jobs' => $jobsCount,
+        'applications' => $applicationsCount,
+        'comments' => $commentsCount
+    ]);
+}
+
+// آخر الوظائف
+public function latestJobs(Request $request)
+{
+    $employer = auth()->user();
+
+    $jobs = $employer->jobs()
+        ->latest()
+        ->withCount('applications')
+        ->take(5)
+        ->get(['id', 'title', 'location', 'status', 'created_at']); // أضيفي location و status
+
+    return response()->json($jobs);
+}
+
+// آخر الطلبات
+public function latestApplications(Request $request)
+{
+    $employer = auth()->user();
+
+    $applications = \App\Models\Application::whereIn('job_id', $employer->jobs()->pluck('id'))
+        ->with('candidate', 'job')
+        ->latest()
+        ->take(5)
+        ->get();
+
+    $formatted = $applications->map(function ($app) {
+        return [
+            'id' => $app->id,
+            'candidate_name' => $app->candidate->name ?? 'غير معروف',
+            'job_title' => $app->job->title ?? 'وظيفة محذوفة',
+            'created_at' => $app->created_at,
+        ];
+    });
+
+    return response()->json($formatted);
+}
+// داخل EmployerController
+public function applicationsByStatus()
+{
+    $employer = auth()->user();
+    $jobIds = $employer->jobs()->pluck('id');
+
+    $pending = \App\Models\Application::whereIn('job_id', $jobIds)->where('status', 'pending')->count();
+    $accepted = \App\Models\Application::whereIn('job_id', $jobIds)->where('status', 'accepted')->count();
+    $rejected = \App\Models\Application::whereIn('job_id', $jobIds)->where('status', 'rejected')->count();
+
+    return response()->json([
+        'pending' => $pending,
+        'accepted' => $accepted,
+        'rejected' => $rejected,
+    ]);
+}
+public function topJobsWithApplications()
+{
+    $employer = auth()->user();
+
+    $jobs = \App\Models\Job::withCount('applications')
+        ->where('employer_id', $employer->id)
+        ->orderBy('applications_count', 'desc')
+        ->take(5)
+        ->get(['id', 'title', 'applications_count']);
+
+    return response()->json($jobs);
+}
+
+
+
 }
