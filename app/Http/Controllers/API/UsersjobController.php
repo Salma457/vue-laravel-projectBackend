@@ -17,6 +17,40 @@ class UsersjobController extends Controller
         return response()->json($jobs);
     }
 
+    public function getAllJobs()
+    {
+        $jobs = Usersjob::with(['category','employer'])->get();
+        return response()->json($jobs);
+    }
+public function search(Request $request)
+{
+    $query = $request->input('query');
+
+    $jobs = Usersjob::where('title', 'LIKE', "%{$query}%")
+        ->orWhere('company', 'LIKE', "%{$query}%")
+        ->orWhere('location', 'LIKE', "%{$query}%")
+        ->get();
+
+    return response()->json($jobs);
+}
+
+public function updateStatus(Request $request, $id)
+{
+    $job = Usersjob::findOrFail($id);
+     $validated = $request->validate([
+        'status' => 'required|in:pending,approved,rejected',
+    ]);
+    $job->status = $validated['status'];
+    $job->save();
+
+    return response()->json([
+        'message' => 'Job status updated successfully',
+        'job' => $job
+    ]);
+
+}
+
+
     public function store(Request $request)
     {
         $validated = $request->validate([

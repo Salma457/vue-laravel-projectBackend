@@ -12,6 +12,11 @@ use App\Http\Controllers\API\UsersjobController;
 /* PUBLIC ROUTES
 -------------------------------------------------------*/
 Route::post('/login', [AuthController::class, 'login']); //login
+//admin
+Route::get('/jobs', [UsersjobController::class, 'getAllJobs']);
+Route::middleware('auth:sanctum')->put('/jobs/{id}/status', [UsersjobController::class, 'updateStatus']);
+//search
+Route::get('/search-jobs', [UsersjobController::class, 'search']);
 
 // users
 Route::get('/users', [UserController::class, 'index']);
