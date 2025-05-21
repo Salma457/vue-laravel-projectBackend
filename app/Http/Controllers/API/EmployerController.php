@@ -62,11 +62,24 @@ class EmployerController extends Controller
             'company_name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'company_website' => 'required|url',
-            'company_logo' => 'required|string',
+            'company_logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'phone' => 'required|string|max:20',
             'bio' => 'required|string',
         ]);
-        
+    
+        // Handle image upload
+        if ($request->hasFile('company_logo')) {
+            $image = $request->file('company_logo');
+            
+            // Generate unique name
+            $imageName = time() . '_' . $image->getClientOriginalName();
+    
+            // Store image in 'public/company_logos'
+            $image->storeAs('public/company_logos', $imageName);
+    
+            // Save the public URL path
+            $validated_employer['company_logo'] = 'storage/company_logos/' . $imageName;
+        }
     
         // create
         $employer = Employer::create($validated_employer);
@@ -77,6 +90,8 @@ class EmployerController extends Controller
             'data' => $employer
         ], 201);
     }
+    
+
 
 
 

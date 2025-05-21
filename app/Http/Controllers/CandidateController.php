@@ -3,34 +3,44 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// import candidate model
 use App\Models\Candidate;
+use Illuminate\Support\Facades\Storage;
 
 class CandidateController extends Controller
 {
-
     public function index(){
         $candidates = Candidate::all();
         return $candidates;
     }
 
-    public function store(Request $request) {
-
-        // validation
+    public function store(Request $request)
+    {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'resume' => 'nullable|string',
+            'user_id' => 'required|exists:users,id|unique:candidates,user_id',
+            'current_job' => 'nullable|string',
+            'experience_level' => 'nullable|string',
+            'highest_qualification' => 'nullable|string',
+            'bio' => 'nullable|string',
+            'resume' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // max 5MB
             'linkedin_profile' => 'nullable|string',
-            'phone_number' => 'required|string',
-            'experience_level' => 'required|string',
-            'location' => 'required|string',
+            'phone_number' => 'nullable|string',
+            'location' => 'nullable|string',
         ]);
 
-        // create candidate
+        // Store the resume file if uploaded
+        if ($request->hasFile('resume')) {
+            $path = $request->file('resume')->store('resumes', 'public');
+            $validated['resume'] = $path;
+        }
+
         $candidate = Candidate::create($validated);
 
-        // send feedback
-        return response()->json(['candidate' => $candidate], 201);
-    }
+        // Optionally add a full URL for the resume in response
+        $candidate->resume_url = $candidate->resume ? asset('storage/' . $candidate->resume) : null;
 
+        return response()->json([
+            'message' => 'Candidate created successfully.',
+            'candidate' => $candidate
+        ], 201);
+    }
 }

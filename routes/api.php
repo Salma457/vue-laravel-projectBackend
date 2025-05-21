@@ -8,8 +8,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\API\EmployerController;
 use App\Http\Controllers\API\UsersjobController;
-// import the application controller
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\PaymentController; 
+
 
 // add the useJobs
 
@@ -82,6 +83,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // GETTING ALL JOBS
 Route::middleware('auth:sanctum')->get('/jobs', [UsersjobController::class, 'getAllJobs']);
+
+
+
+// ADDING PAYMENT
+Route::post('/create-stripe-session', [PaymentController::class, 'createStripeSession']);
+Route::get('/stripe-success', [PaymentController::class, 'stripeSuccess']);
 
 
 
