@@ -43,4 +43,13 @@ class CandidateController extends Controller
             'candidate' => $candidate
         ], 201);
     }
+
+
+    public function getByUserId($user_id)
+    {
+        $candidate = Candidate::where('user_id', $user_id)->first();
+        if (!$candidate) {return response()->json(['message' => 'Candidate not found'], 404);}
+        return response()->json($candidate);
+    }
+      
 }

@@ -77,7 +77,7 @@ Route::middleware('auth:sanctum')->delete('/employer/delete', [EmployerControlle
 Route::middleware('auth:sanctum')->post('/employer/change-password', [EmployerController::class, 'changePassword']);
 
 // [SENU] adding applications:
-Route::middleware('auth:sanctum')->post('/candidate/applications-add', [ApplicationController::class, 'store']);
+Route::middleware('auth:sanctum')->post('/candidate/applications-add', [ApplicationController::class, 'store']); //HERE
 Route::middleware('auth:sanctum')->get('applications/candidate/{candidate_id}', [ApplicationController::class, 'getByCandidate']);
 Route::middleware('auth:sanctum')->delete('/applications/{id}', [ApplicationController::class, 'destroy']);
 
@@ -105,6 +105,9 @@ Route::get('/job/options', [EnumOptionsController::class, 'jobOptions']);
 // GETTING ALL JOBS
 Route::middleware('auth:sanctum')->get('/jobs', [UsersjobController::class, 'getAllJobs']);
 
+
+// GETTING THE APPLICATION FOR BASED ON THE USER_ID
+Route::get('/candidate/user/{user_id}', [CandidateController::class, 'getByUserId']);
 
 
 // ADDING PAYMENT
