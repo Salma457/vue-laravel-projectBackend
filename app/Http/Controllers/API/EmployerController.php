@@ -271,9 +271,13 @@ public function showApplication($id)
 // احصائيات للوحة التحكم
 public function dashboardStats(Request $request)
 {
-    $employer = auth()->user();
+    $employer = auth()->user()->employer;
 
-    $jobsCount = $employer->jobs()->count(); // علاقة jobs لازم تكون معرفة في الموديل
+    if (!$employer) {
+        return response()->json(['error' => 'Employer not found'], 404);
+    }
+
+    $jobsCount = $employer->jobs()->count();
     $applicationsCount = \App\Models\Application::whereIn('job_id', $employer->jobs()->pluck('id'))->count();
     $commentsCount = \App\Models\Comment::whereIn('job_id', $employer->jobs()->pluck('id'))->count();
 
@@ -284,24 +288,34 @@ public function dashboardStats(Request $request)
     ]);
 }
 
+
 // آخر الوظائف
 public function latestJobs(Request $request)
 {
-    $employer = auth()->user();
+    $employer = auth()->user()->employer;
+
+    if (!$employer) {
+        return response()->json(['error' => 'Employer not found'], 404);
+    }
 
     $jobs = $employer->jobs()
         ->latest()
         ->withCount('applications')
         ->take(5)
-        ->get(['id', 'title', 'location', 'status', 'created_at']); // أضيفي location و status
+        ->get(['id', 'title', 'location', 'status', 'created_at']);
 
     return response()->json($jobs);
 }
 
+
 // آخر الطلبات
 public function latestApplications(Request $request)
 {
-    $employer = auth()->user();
+    $employer = auth()->user()->employer;
+
+    if (!$employer) {
+        return response()->json(['error' => 'Employer not found'], 404);
+    }
 
     $applications = \App\Models\Application::whereIn('job_id', $employer->jobs()->pluck('id'))
         ->with('candidate.user', 'job')
@@ -312,7 +326,7 @@ public function latestApplications(Request $request)
     $formatted = $applications->map(function ($app) {
         return [
             'id' => $app->id,
-            'candidate_name' => $app->candidate->user->name ?? 'غير معروف', // <-- اسم المستخدم
+            'candidate_name' => $app->candidate->user->name ?? 'غير معروف',
             'job_title' => $app->job->title ?? 'Deleted Job',
             'created_at' => $app->created_at,
         ];
