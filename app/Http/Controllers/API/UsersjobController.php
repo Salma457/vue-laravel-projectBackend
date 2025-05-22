@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UsersjobController extends Controller
 {
-    // [SENU]: get all the jobs normally
+  
     public function getAllJobs()
     {
         $jobs = Usersjob::with(['category', 'employer'])->get();
@@ -18,20 +18,10 @@ class UsersjobController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        // Check if the authenticated user is an admin
         $user = Auth::user();
-
-
-        // if (!$user || $user->role != 'admin') {
-        //     return response()->json(['message' => 'Unauthorized'], 403);
-        // }
-
-        // Validate the incoming status
         $request->validate([
             'status' => 'required|in:pending,approved,rejected',
         ]);
-
-        // Find and update the job
         $job = Usersjob::findOrFail($id);
         $job->status = $request->status;
         $job->save();
@@ -41,7 +31,21 @@ class UsersjobController extends Controller
             'job' => $job
         ]);
     }
-
+ //search
+public function search(Request $request)
+{
+      $query = $request->input('query');
+    $jobs = Usersjob::where('status', 'approved')
+                ->where(function($q) use ($query) {
+                    $q->where('title', 'like', '%' . $query . '%')
+                      ->orWhere('location', 'like', '%' . $query . '%')
+                      ->orWhere('description', 'like', '%' . $query . '%')
+                      ->orWhere('responsibilities', 'like', '%' . $query . '%')
+                      ->orWhere('benefits', 'like', '%' . $query . '%');
+                })
+                ->get();
+           return response()->json($jobs);
+}
     public function index()
     {
         $employer = Auth::user()->employer;

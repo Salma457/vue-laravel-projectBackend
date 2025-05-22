@@ -101,11 +101,14 @@ Route::get('/job/options', [EnumOptionsController::class, 'jobOptions']);
 
 });
 
+//admin
+//get
+Route::get('/jobs', [UsersjobController::class, 'getAllJobs']);
+//edit
+Route::put('/jobs/{id}/status', [UsersjobController::class, 'updateStatus']);
 
-// GETTING ALL JOBS
-Route::middleware('auth:sanctum')->get('/jobs', [UsersjobController::class, 'getAllJobs']);
-
-
+//search
+Route::get('/usersjobs/search', [UsersjobController::class, 'search']);
 // GETTING THE APPLICATION FOR BASED ON THE USER_ID
 Route::get('/candidate/user/{user_id}', [CandidateController::class, 'getByUserId']);
 
