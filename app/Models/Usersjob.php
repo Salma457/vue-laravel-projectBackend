@@ -26,6 +26,7 @@ class Usersjob extends Model
         'description',
         'responsibilities',
         'benefits',
+        'status',
     ];
 
     public function employer()

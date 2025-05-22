@@ -21,37 +21,6 @@ class EmployerController extends Controller
         return $emps;
     }
 
-    // public function register(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'name'           => 'required|string|max:255',
-    //         'email'          => 'required|string|email|unique:users,email',
-    //         'password'       => 'required|string|min:6',
-    //         'company_name'   => 'required|string|max:255',
-    //         'location'       => 'nullable|string',
-    //         'company_website'=> 'nullable|url',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json($validator->errors(), 422);
-    //     }
-
-    //     $user = User::create([
-    //         'name'     => $request->name,
-    //         'email'    => $request->email,
-    //         'password' => Hash::make($request->password),
-    //         'role'     => 'employer',
-    //     ]);
-
-    //     Employer::create([
-    //         'user_id'        => $user->id,
-    //         'company_name'   => $request->company_name,
-    //         'location'       => $request->location,
-    //         'company_website'=> $request->company_website,
-    //     ]);
-
-    //     return response()->json(['message' => 'Employer registered successfully'], 201);
-    // }
 
 
     public function store(Request $request)
@@ -113,7 +82,6 @@ public function profile(Request $request)
 {
     $user = $request->user();
 
-    // تأكد إنه صاحب عمل
     if ($user->role !== 'employer') {
         return response()->json(['error' => 'Unauthorized'], 403);
     }
@@ -145,12 +113,10 @@ public function updateProfile(Request $request)
         return response()->json($validator->errors(), 422);
     }
 
-    // تحديث بيانات المستخدم
     $user->update([
         'name' => $request->name ?? $user->name,
     ]);
 
-    // تحديث بيانات صاحب العمل
     $employer = Employer::where('user_id', $user->id)->first();
     $employer->update([
         'company_name'    => $request->company_name ?? $employer->company_name,
@@ -209,7 +175,6 @@ public function deleteAccount()
 {
     $user = Auth::user();
 
-    // حذف صاحب العمل وكل ما يتعلق به حسب العلاقات
     $user->employer()->delete();
     $user->delete();
 
@@ -237,7 +202,6 @@ public function showApplication($id)
 {
     $employer = Auth::user()->employer;
 
-    // نجيب الطلب مع العلاقات
     $application = Application::with(['job', 'candidate.user'])
         ->where('id', $id)
         ->whereHas('job', function ($query) use ($employer) {
@@ -251,12 +215,11 @@ public function showApplication($id)
 
     return response()->json($application);
 }
-// احصائيات للوحة التحكم
 public function dashboardStats(Request $request)
 {
     $employer = auth()->user();
 
-    $jobsCount = $employer->jobs()->count(); // علاقة jobs لازم تكون معرفة في الموديل
+    $jobsCount = $employer->jobs()->count();
     $applicationsCount = \App\Models\Application::whereIn('job_id', $employer->jobs()->pluck('id'))->count();
     $commentsCount = \App\Models\Comment::whereIn('job_id', $employer->jobs()->pluck('id'))->count();
 
@@ -267,7 +230,6 @@ public function dashboardStats(Request $request)
     ]);
 }
 
-// آخر الوظائف
 public function latestJobs(Request $request)
 {
     $employer = auth()->user();
@@ -281,7 +243,6 @@ public function latestJobs(Request $request)
     return response()->json($jobs);
 }
 
-// آخر الطلبات
 public function latestApplications(Request $request)
 {
     $employer = auth()->user();
@@ -304,7 +265,6 @@ public function latestApplications(Request $request)
     return response()->json($formatted);
 }
 
-// داخل EmployerController
 public function applicationsByStatus()
 {
     $employer = auth()->user();

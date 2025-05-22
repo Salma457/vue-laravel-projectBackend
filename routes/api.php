@@ -10,7 +10,7 @@ use App\Http\Controllers\API\EmployerController;
 use App\Http\Controllers\API\UsersjobController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\EnumOptionsController;
-
+use App\Http\Controllers\API\StripeController;
 
 /* PUBLIC ROUTES
 -------------------------------------------------------*/
@@ -28,6 +28,8 @@ Route::post('/candidates', [CandidateController::class, 'store']);
 Route::get('/employers', [EmployerController::class, 'index']);
 Route::post('/employers', [EmployerController::class, 'store']);
 
+Route::post('/create-checkout-session', [StripeController::class, 'createCheckoutSession']);
+Route::post('/stripe/webhook', [StripeController::class, 'handleWebhook']);
 // for authintcation
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -53,7 +55,6 @@ Route::middleware('auth:sanctum')->prefix('employer')->group(function () {
     Route::put('jobs/{id}', [UsersjobController::class, 'update']);
     Route::delete('jobs/{id}', [UsersjobController::class, 'destroy']);
 
-     // إحصائيات للوحة التحكم
     Route::get('stats', [EmployerController::class, 'dashboardStats']);
     Route::get('latest-jobs', [EmployerController::class, 'latestJobs']);
     Route::get('latest-applications', [EmployerController::class, 'latestApplications']);
@@ -84,20 +85,9 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/job/options', [EnumOptionsController::class, 'jobOptions']);
 
 
+
 });
 
 
 
-// LOGIC:
-/*
-Route::middleware('auth:sanctum'):
-makes sure Laravel auto checks Bearer token in the Authorization header.
 
-If valid:::::::
-auth()->user()
-$request->user():
-will return the logged-in user.
-
-
-
-*/
