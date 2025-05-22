@@ -123,4 +123,29 @@ class UsersjobController extends Controller
 
         return response()->json(['message' => 'Job deleted successfully']);
     }
+
+
+
+
+    // SENU: ADDING THE SEARCHING JOBS FOR THE JOB PAGE ::::
+    public function searchJobs(Request $request)
+{
+    $title = $request->query('title');
+    $location = $request->query('location');
+
+    $query = Usersjob::query();
+
+    if ($title) {
+        $query->where('title', 'LIKE', '%' . $title . '%');
+    }
+
+    if ($location) {
+        $query->where('location', 'LIKE', '%' . $location . '%');
+    }
+
+    $jobs = $query->get();
+
+    return response()->json($jobs);
+}
+
 }

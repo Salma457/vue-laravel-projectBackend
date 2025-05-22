@@ -119,6 +119,12 @@ Route::get('/stripe-success', [PaymentController::class, 'stripeSuccess']);
 Route::put('/jobs/{id}/status', [UsersjobController::class, 'updateStatus']);
 
 
+// SENU: ADDING SEARCH FOR MY JOBS PAGE===========================================================
+Route::middleware('auth:sanctum')->get('/jobs/search', [UsersjobController::class, 'searchJobs']);
+//================================================================================================
+
+
+
 
 // LOGIC:
 /*
