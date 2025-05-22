@@ -9,35 +9,46 @@ use Illuminate\Support\Facades\Auth;
 
 class UsersjobController extends Controller
 {
-
-
-    //[SENU]:get all the jobs normally
+    // [SENU]: get all the jobs normally
     public function getAllJobs()
     {
-        $jobs = Usersjob::with(['category','employer'])->get();
+        $jobs = Usersjob::with(['category', 'employer'])->get();
         return response()->json($jobs);
     }
-    
+
+    public function updateStatus(Request $request, $id)
+    {
+        // Check if the authenticated user is an admin
+        $user = Auth::user();
 
 
+        // if (!$user || $user->role != 'admin') {
+        //     return response()->json(['message' => 'Unauthorized'], 403);
+        // }
 
+        // Validate the incoming status
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected',
+        ]);
 
+        // Find and update the job
+        $job = Usersjob::findOrFail($id);
+        $job->status = $request->status;
+        $job->save();
 
+        return response()->json([
+            'message' => 'Job status updated successfully',
+            'job' => $job
+        ]);
+    }
 
     public function index()
     {
         $employer = Auth::user()->employer;
 
-        // return response()->json($employer);
-
         $jobs = $employer->jobs()->with('category')->get();
         return response()->json($jobs);
     }
-
-
-
-
-
 
     public function store(Request $request)
     {

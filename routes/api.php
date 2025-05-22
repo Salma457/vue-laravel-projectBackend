@@ -115,6 +115,9 @@ Route::post('/create-stripe-session', [PaymentController::class, 'createStripeSe
 Route::get('/stripe-success', [PaymentController::class, 'stripeSuccess']);
 
 
+// ADDING ADMING FUNCTIONALITY::
+Route::put('/jobs/{id}/status', [UsersjobController::class, 'updateStatus']);
+
 
 
 // LOGIC:
