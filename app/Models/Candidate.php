@@ -8,24 +8,25 @@ use App\Models\User;
 
 class Candidate extends Model
 {
-    
     protected $fillable = [
-        'user_id',
-        'resume',
-        'linkedin_profile',
-        'phone_number',
-        'experience_level',
-        'location'
-    ];
+    'user_id',
+    'current_job',
+    'experience_level',
+    'highest_qualification',
+    'bio',
+    'resume',
+    'linkedin_profile',
+    'phone_number',
+    'location'
+];
+    public function applications()
+{
+    return $this->hasMany(Application::class);
+}
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
 
-    // adding the relationship with the user model
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function applications() {
-        return $this->hasMany(Application::class);
-    }
 
 }

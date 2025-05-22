@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; 
+use Laravel\Sanctum\HasApiTokens;
 use App\Models\Employer;
 use App\Models\Candidate;
 
@@ -13,7 +13,7 @@ use App\Models\Candidate;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    
+
     protected $fillable = ['name', 'email', 'password', 'role', 'profile_picture'];
 
     protected $hidden = ['remember_token'];
@@ -41,6 +41,12 @@ class User extends Authenticatable
     public function isCandidate(): bool{
         return $this->role === 'candidate';
     }
+// App\Models\User.php
 
+
+public function jobs()
+{
+    return $this->hasMany(Usersjob::class, 'employer_id'); // employer_id هو اسم العمود الذي يربط الوظائف بالمستخدم
+}
 
 }

@@ -16,7 +16,7 @@ class Application extends Model
         'candidate_id',
         'resume_snapshot',
         'contact_phone',
-        'status',
+        'status'
     ];
 
     public function job()
