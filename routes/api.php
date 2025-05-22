@@ -12,9 +12,11 @@ use App\Http\Controllers\API\UsersjobController;
 -------------------------------------------------------*/
 Route::post('/login', [AuthController::class, 'login']); //login
 //admin
-// Route::middleware(['auth:sanctum', 'can:view-all-jobs'])->group(function () {
-//     Route::get('/admin/jobs', [AdminController::class, 'index']); // New controller or method
-// });
+Route::get('/jobs', [UsersjobController::class, 'getAllJobs']);
+Route::middleware('auth:sanctum')->put('/jobs/{id}/status', [UsersjobController::class, 'updateStatus']);
+//search
+Route::get('/search-jobs', [UsersjobController::class, 'search']);
+
 // users
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
