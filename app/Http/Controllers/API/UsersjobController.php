@@ -16,22 +16,26 @@ class UsersjobController extends Controller
 
         return response()->json($jobs);
     }
-
+//get all jobs
     public function getAllJobs()
     {
         $jobs = Usersjob::with(['category','employer'])->get();
         return response()->json($jobs);
     }
+    //search
 public function search(Request $request)
 {
-    $query = $request->input('query');
-
-    $jobs = Usersjob::where('title', 'LIKE', "%{$query}%")
-        ->orWhere('company', 'LIKE', "%{$query}%")
-        ->orWhere('location', 'LIKE', "%{$query}%")
-        ->get();
-
-    return response()->json($jobs);
+      $query = $request->input('query');
+    $jobs = Usersjob::where('status', 'approved')
+                ->where(function($q) use ($query) {
+                    $q->where('title', 'like', '%' . $query . '%')
+                      ->orWhere('location', 'like', '%' . $query . '%')
+                      ->orWhere('description', 'like', '%' . $query . '%')
+                      ->orWhere('responsibilities', 'like', '%' . $query . '%')
+                      ->orWhere('benefits', 'like', '%' . $query . '%');
+                })
+                ->get();
+           return response()->json($jobs);
 }
 
 public function updateStatus(Request $request, $id)

@@ -15,8 +15,7 @@ Route::post('/login', [AuthController::class, 'login']); //login
 Route::get('/jobs', [UsersjobController::class, 'getAllJobs']);
 Route::middleware('auth:sanctum')->put('/jobs/{id}/status', [UsersjobController::class, 'updateStatus']);
 //search
-Route::get('/search-jobs', [UsersjobController::class, 'search']);
-
+Route::get('/usersjobs/search', [UsersjobController::class, 'search']);
 // users
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
